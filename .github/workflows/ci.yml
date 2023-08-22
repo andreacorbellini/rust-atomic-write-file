@@ -1,0 +1,83 @@
+name: Cargo Test
+
+on:
+  push:
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  cargo-test-linux:
+    name: Build and Test (Linux${{ contains(matrix.target, 'musl') && ', musl' || '' }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - x86_64-unknown-linux-gnu
+          - x86_64-unknown-linux-musl
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: ${{ matrix.target }}
+      - name: Build and Test
+        run: |
+          export TEST_DIR=$RUNNER_TEMP
+          cargo test --target ${{ matrix.target }} --release --verbose
+      - name: Lint
+        run: |
+          cargo clippy --release --all-targets
+
+  cargo-test-macos:
+    name: Build and Test (MacOS)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - name: Build and Test
+        run: |
+          export TEST_DIR=$RUNNER_TEMP
+          cargo test --release --verbose
+      - name: Lint
+        run: |
+          cargo clippy --release --all-targets
+
+  cargo-test-windows:
+    name: Build and Test (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - name: Build and Test
+        run: |
+          set TEST_DIR=%RUNNER_TEMP%
+          cargo test --release --verbose
+      - name: Lint
+        run: |
+          cargo clippy --release --all-targets
+
+  cargo-test-wasi:
+    name: Build (wasi)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: wasm32-wasi
+      - uses: actions-rs/install@v0.1
+        with:
+          crate: cargo-wasi
+          version: latest
+      - name: Build
+        run: |
+          cargo wasi build --release --verbose
+      - name: Lint
+        run: |
+          cargo clippy --release --all-targets

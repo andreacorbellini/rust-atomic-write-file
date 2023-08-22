@@ -1,0 +1,28 @@
+[package]
+name = "atomic-write-file"
+version = "0.1.0"
+authors = ["Andrea Corbellini <corbellini.andrea@gmail.com>"]
+edition = "2021"
+license = "BSD-3-Clause"
+
+description = "Write files atomically to a file system"
+repository = "https://github.com/andreacorbellini/rust-atomic-write-file"
+
+keywords = ["file", "atomic", "write"]
+categories = ["filesystem"]
+
+[dependencies]
+rand = { version = "0.8" }
+
+[target.'cfg(unix)'.dependencies]
+nix = { version = "0.26" }
+
+[features]
+default = ["unnamed-tmpfile"]
+
+unnamed-tmpfile = []
+
+unstable-can_vector = []
+unstable-read_buf = []
+unstable-seek_stream_len = []
+unstable-unix_file_vectored_at = []

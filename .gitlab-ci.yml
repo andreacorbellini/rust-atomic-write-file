@@ -1,0 +1,16 @@
+stages:
+  - test
+
+cargo-test:
+  stage: test
+  image: rust:latest
+  parallel:
+    matrix:
+      os:
+        - linux
+        - macos
+        - windows
+  tags:
+    - ${os}
+  script:
+    - cargo test --release --verbose
