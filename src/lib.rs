@@ -108,19 +108,19 @@
 //! rename("/path/to/directory/.filename.XXXXXX", "/path/to/directory/filename");
 //! ```
 //!
-//! This Linux-specific behavior is enabled using the `unnamed-tmpfile` feature, which is enabled
-//! by default.
+//! This Linux-specific behavior is controlled by the `unnamed-tmpfile` feature of this Crate,
+//! which is enabled by default.
 //!
 //! ## Notes and Limitations
 //!
 //! * If the path of an [`AtomicWriteFile`] is a directory or a file that cannot be removed (due to
-//!   permissions or special attributes), an error will be produce when the [`AtomicWriteFile`] is
+//!   permissions or special attributes), an error will be produced when the [`AtomicWriteFile`] is
 //!   committed. This is in contrast with the standard `File`, which would instead produce an error
 //!   at `open()` time.
 //!
 //! * [`AtomicWriteFile`] is designed so that the temporary files it creates are automatically
 //!   removed if an error (such as a panic) occurs. However, if the process is interrupted abruptly
-//!   (without unwinding or running destructors), temporary files may be left in the filesystem.
+//!   (without unwinding or running destructors), temporary files may be left on the filesystem.
 //!
 //! * On Linux, with the `unnamed-tmpfile` feature (enabled by default), [`AtomicWriteFile`] uses
 //!   unnamed temporary files. This ensures that, if the process is interrupted abruptly *before* a
@@ -131,14 +131,13 @@
 //! * On Linux, with the `unnamed-tmpfile` feature (enabled by default), [`AtomicWriteFile`]
 //!   requires the `/proc` filesystem to be mounted. This makes [`AtomicWriteFile`] unsuitable for
 //!   use in processes that run early at boot. Disable the `unnamed-tmpfile` feature if you need to
-//!   run on
+//!   run your program in situations where `/proc` is not available.
 //!
 //! * If the path of an [`AtomicWriteFile`] is a symlink to another file, the symlink is replaced,
-//!   the target of the original symlink is left untouched.
-//!
-//!   If you intend to modify the file pointed by a symlink at open time, call
-//!   [`Path::canonicalize()`] prior to calling [`AtomicWriteFile::open()`] or
-//!   [`OpenOptions::open()`]. In the future, handling of symlinks will be better customizable.
+//!   and the target of the original symlink is left untouched. If you intend to modify the file
+//!   pointed by a symlink at open time, call [`Path::canonicalize()`] prior to calling
+//!   [`AtomicWriteFile::open()`] or [`OpenOptions::open()`]. In the future, handling of symlinks
+//!   will be better customizable.
 //!
 //! * Because [`AtomicWriteFile`] works by creating a temporary file, and then replacing the
 //!   original file (see ["how it works"](#how-it-works) above), some metadata of the original file
@@ -146,7 +145,7 @@
 //!
 //!   * On Unix, it is possible to preserve permissions and ownership of the original file.
 //!     However, it is not generally possible to preserve the same owner user/group of the original
-//!     file unless the process runs as root, or with the `CAP_CHOWN` capability on Linux. See
+//!     file unless the process runs as root (or with the `CAP_CHOWN` capability on Linux). See
 //!     [`OpenOptionsExt::try_preserve_owner()`](crate::unix::OpenOptionsExt::try_preserve_owner)
 //!     for more details on the behavior of [`open()`](OpenOptions::open) when ownership cannot be
 //!     preserved.
