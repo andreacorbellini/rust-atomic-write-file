@@ -175,7 +175,7 @@ fn copy_file_perms<P: AsRef<Path>>(
         Err(err) => return Err(err.into()),
     };
     if opts.preserve_mode {
-        let mode = unsafe { Mode::from_bits_unchecked(stat.st_mode) };
+        let mode = Mode::from_bits_retain(stat.st_mode);
         fchmod(copy_to.as_raw_fd(), mode)?;
     }
     if opts.preserve_owner.is_yes() {
