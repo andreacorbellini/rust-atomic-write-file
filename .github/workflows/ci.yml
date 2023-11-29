@@ -30,6 +30,24 @@ jobs:
         run: |
           cargo clippy --release --all-targets
 
+  cargo-test-linux-overlayfs:
+    name: Build and Test (Linux, overlayfs)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - name: Build and Test
+        run: |
+          mkdir $RUNNER_TEMP/lower
+          mkdir $RUNNER_TEMP/upper
+          mkdir $RUNNER_TEMP/work
+          mkdir $RUNNER_TEMP/merged
+          export TEST_DIR=$RUNNER_TEMP/merged
+          sudo mount -t overlay none -o lowerdir=$RUNNER_TEMP/lower,upperdir=$RUNNER_TEMP/upper,workdir=$RUNNER_TEMP/work $TEST_DIR
+          cargo test --release --verbose
+
   cargo-test-macos:
     name: Build and Test (MacOS)
     runs-on: macos-latest
