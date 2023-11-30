@@ -84,7 +84,10 @@ impl TemporaryFile {
         // generic Unix implementation would do.
         let (file, temporary_name) = match create_unnamed_temporary_file(&dir, opts) {
             Ok(file) => (file, None),
-            Err(Errno::ENOTSUP) => {
+            // Linux >= 3.11 may return ENOTSUP if the filesystem does not support unnamed
+            // temporary files; Linux < 3.11 will return EISDIR because O_TMPFILE is not supported
+            // at all.
+            Err(Errno::ENOTSUP) | Err(Errno::EISDIR) => {
                 let (file, temporary_name) = create_temporary_file(&dir, opts, &name)?;
                 (file, Some(temporary_name))
             }
