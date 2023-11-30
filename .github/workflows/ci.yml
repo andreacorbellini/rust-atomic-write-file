@@ -45,6 +45,7 @@ jobs:
           mkdir $RUNNER_TEMP/work
           mkdir $RUNNER_TEMP/merged
           export TEST_DIR=$RUNNER_TEMP/merged
+          export TEST_DIR_SUPPORTS_UNNAMED=false
           sudo mount -t overlay none -o lowerdir=$RUNNER_TEMP/lower,upperdir=$RUNNER_TEMP/upper,workdir=$RUNNER_TEMP/work $TEST_DIR
           cargo test --release --verbose
 

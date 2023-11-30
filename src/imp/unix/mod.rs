@@ -1,14 +1,19 @@
 use nix::errno::Errno;
 use nix::fcntl::open;
+use nix::fcntl::openat;
+use nix::fcntl::renameat;
 use nix::fcntl::AtFlags;
 use nix::fcntl::OFlag;
+use nix::libc;
 use nix::sys::stat::fchmod;
 use nix::sys::stat::fstatat;
 use nix::sys::stat::mode_t;
 use nix::sys::stat::Mode;
 use nix::unistd::fchown;
+use nix::unistd::unlinkat;
 use nix::unistd::Gid;
 use nix::unistd::Uid;
+use nix::unistd::UnlinkatFlags;
 use rand::distributions::Alphanumeric;
 use rand::Rng;
 use std::ffi::OsStr;
@@ -141,6 +146,54 @@ impl RandomName {
     fn into_os_string(self) -> OsString {
         OsString::from_vec(self.buf)
     }
+}
+
+fn create_temporary_file(
+    dir: &Dir,
+    opts: &OpenOptions,
+    name: &OsStr,
+) -> nix::Result<(File, OsString)> {
+    let access_mode = if opts.read {
+        OFlag::O_RDWR
+    } else {
+        OFlag::O_WRONLY
+    };
+    let flags = access_mode
+        | OFlag::O_CREAT
+        | OFlag::O_EXCL
+        | OFlag::O_CLOEXEC
+        | OFlag::from_bits_truncate(opts.custom_flags & !libc::O_ACCMODE);
+    let create_mode = Mode::from_bits_truncate(opts.mode);
+
+    let mut random_name = RandomName::new(name);
+    let file_fd = loop {
+        match openat(dir.as_raw_fd(), random_name.next(), flags, create_mode) {
+            Ok(file_fd) => break file_fd,
+            Err(Errno::EEXIST) => continue,
+            Err(err) => return Err(err),
+        }
+    };
+
+    let file = unsafe { File::from_raw_fd(file_fd) };
+    let temporary_name = random_name.into_os_string();
+    Ok((file, temporary_name))
+}
+
+fn rename_temporary_file(dir: &Dir, temporary_name: &OsStr, name: &OsStr) -> nix::Result<()> {
+    renameat(
+        Some(dir.as_raw_fd()),
+        temporary_name,
+        Some(dir.as_raw_fd()),
+        name,
+    )
+}
+
+fn remove_temporary_file(dir: &Dir, temporary_name: &OsStr) -> nix::Result<()> {
+    unlinkat(
+        Some(dir.as_raw_fd()),
+        temporary_name,
+        UnlinkatFlags::NoRemoveDir,
+    )
 }
 
 fn maybe_ignore_eperm(result: nix::Result<()>, preserve: Preserve) -> nix::Result<()> {

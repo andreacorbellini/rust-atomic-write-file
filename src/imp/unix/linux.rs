@@ -1,15 +1,18 @@
 use crate::imp::unix::copy_file_perms;
+use crate::imp::unix::create_temporary_file;
+use crate::imp::unix::remove_temporary_file;
+use crate::imp::unix::rename_temporary_file;
 use crate::imp::unix::Dir;
 use crate::imp::unix::OpenOptions;
 use crate::imp::unix::RandomName;
 use nix::errno::Errno;
 use nix::fcntl::openat;
-use nix::fcntl::renameat;
 use nix::fcntl::OFlag;
 use nix::libc;
 use nix::sys::stat::Mode;
 use nix::unistd::linkat;
 use nix::unistd::LinkatFlags;
+use std::ffi::OsStr;
 use std::ffi::OsString;
 use std::fs::File;
 use std::io::Result;
@@ -17,11 +20,52 @@ use std::os::fd::AsRawFd;
 use std::os::fd::FromRawFd;
 use std::path::Path;
 
+fn create_unnamed_temporary_file(dir: &Dir, opts: &OpenOptions) -> nix::Result<File> {
+    let access_mode = if opts.read {
+        OFlag::O_RDWR
+    } else {
+        OFlag::O_WRONLY
+    };
+    let flags = OFlag::O_TMPFILE
+        | access_mode
+        | OFlag::O_CLOEXEC
+        | OFlag::from_bits_truncate(opts.custom_flags & !libc::O_ACCMODE);
+    let create_mode = Mode::from_bits_truncate(opts.mode);
+
+    let file_fd = openat(dir.as_raw_fd(), ".", flags, create_mode)?;
+
+    let file = unsafe { File::from_raw_fd(file_fd) };
+    Ok(file)
+}
+
+fn rename_unnamed_temporary_file(dir: &Dir, file: &File, name: &OsStr) -> nix::Result<()> {
+    let fd = file.as_raw_fd();
+    let src = OsString::from(format!("/proc/self/fd/{fd}"));
+    let mut random_name = RandomName::new(name);
+
+    let temporary_name = loop {
+        match linkat(
+            Some(dir.as_raw_fd()),
+            src.as_os_str(),
+            Some(dir.as_raw_fd()),
+            random_name.next(),
+            LinkatFlags::SymlinkFollow,
+        ) {
+            Ok(()) => break random_name.into_os_string(),
+            Err(Errno::EEXIST) => continue,
+            Err(err) => return Err(err),
+        }
+    };
+
+    rename_temporary_file(dir, &temporary_name, name)
+}
+
 #[derive(Debug)]
 pub(crate) struct TemporaryFile {
     pub(crate) dir: Dir,
     pub(crate) file: File,
     pub(crate) name: OsString,
+    pub(crate) temporary_name: Option<OsString>,
 }
 
 impl TemporaryFile {
@@ -35,62 +79,45 @@ impl TemporaryFile {
             Dir::open(".")?
         };
 
-        let access_mode = if opts.read {
-            OFlag::O_RDWR
-        } else {
-            OFlag::O_WRONLY
+        // Try to open an unnamed temporary file (with O_TMPFILE). This may not be supported on all
+        // filesystems; if it's not supported, create a named temporary file in the same way the
+        // generic Unix implementation would do.
+        let (file, temporary_name) = match create_unnamed_temporary_file(&dir, opts) {
+            Ok(file) => (file, None),
+            Err(Errno::ENOTSUP) => {
+                let (file, temporary_name) = create_temporary_file(&dir, opts, &name)?;
+                (file, Some(temporary_name))
+            }
+            Err(err) => return Err(err.into()),
         };
-
-        let file_fd = openat(
-            dir.as_raw_fd(),
-            ".",
-            OFlag::O_TMPFILE
-                | access_mode
-                | OFlag::O_CLOEXEC
-                | OFlag::from_bits_truncate(opts.custom_flags & !libc::O_ACCMODE),
-            Mode::from_bits_truncate(opts.mode),
-        )?;
-        let file = unsafe { File::from_raw_fd(file_fd) };
 
         if opts.preserve_mode || opts.preserve_owner.is_yes() {
             copy_file_perms(&dir, &name, &file, opts)?;
         }
 
-        Ok(Self { dir, file, name })
-    }
-
-    fn link_to_random_name(&self) -> nix::Result<OsString> {
-        let fd = self.file.as_raw_fd();
-        let src = OsString::from(format!("/proc/self/fd/{fd}"));
-        let mut random_name = RandomName::new(&self.name);
-
-        loop {
-            match linkat(
-                Some(self.dir.as_raw_fd()),
-                src.as_os_str(),
-                Some(self.dir.as_raw_fd()),
-                random_name.next(),
-                LinkatFlags::SymlinkFollow,
-            ) {
-                Ok(()) => return Ok(random_name.into_os_string()),
-                Err(Errno::EEXIST) => continue,
-                Err(err) => return Err(err),
-            }
-        }
+        Ok(Self {
+            dir,
+            file,
+            name,
+            temporary_name,
+        })
     }
 
     pub(crate) fn rename_file(&self) -> Result<()> {
-        let src = self.link_to_random_name()?;
-        renameat(
-            Some(self.dir.as_raw_fd()),
-            src.as_os_str(),
-            Some(self.dir.as_raw_fd()),
-            self.name.as_os_str(),
-        )?;
+        match self.temporary_name {
+            None => rename_unnamed_temporary_file(&self.dir, &self.file, &self.name)?,
+            Some(ref temporary_name) => {
+                rename_temporary_file(&self.dir, temporary_name, &self.name)?
+            }
+        }
         Ok(())
     }
 
     pub(crate) fn remove_file(&self) -> Result<()> {
+        match self.temporary_name {
+            None => (),
+            Some(ref temporary_name) => remove_temporary_file(&self.dir, temporary_name)?,
+        }
         Ok(())
     }
 }

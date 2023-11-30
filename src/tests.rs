@@ -54,6 +54,22 @@ fn list_temporary_files<P: AsRef<Path>>(path: P) -> impl Iterator<Item = PathBuf
     })
 }
 
+fn verify_temporary_file_name<P1: AsRef<Path>, P2: AsRef<Path>>(
+    dst_file_name: P1,
+    temp_file_name: P2,
+) {
+    let dst_file_name = dst_file_name.as_ref().to_string_lossy().to_string();
+    let temp_file_name = temp_file_name.as_ref().to_string_lossy().to_string();
+    let prefix = format!(".{}.", dst_file_name);
+    assert!(
+        temp_file_name.is_ascii()
+            && temp_file_name.starts_with(&prefix)
+            && temp_file_name.len() == prefix.len() + 6,
+        "invalid temporary file name: {:?}",
+        temp_file_name
+    );
+}
+
 fn verify_no_leftovers<P: AsRef<Path>>(path: P) {
     let leftovers = list_temporary_files(path).collect::<Vec<PathBuf>>();
     if !leftovers.is_empty() {
@@ -170,10 +186,27 @@ fn no_change_on_panic() -> Result<()> {
 
 #[test]
 #[cfg(all(target_os = "linux", feature = "unnamed-tmpfile"))]
-fn creates_unnamed_temporary_files() -> Result<()> {
+fn creates_unnamed_temporary_files_if_supported() -> Result<()> {
     let path = test_file("foo");
     let file = AtomicWriteFile::open(&path)?;
-    assert_eq!(list_temporary_files(path).next(), None);
+
+    if option_env!("TEST_DIR_SUPPORTS_UNNAMED")
+        .unwrap_or("true")
+        .parse()
+        .unwrap_or(true)
+    {
+        assert_eq!(
+            list_temporary_files(path).next(),
+            None,
+            "expected no temporary files"
+        );
+    } else {
+        let temp_file_name = list_temporary_files(path)
+            .next()
+            .expect("no temporary files found");
+        verify_temporary_file_name("foo", temp_file_name);
+    }
+
     file.commit()
 }
 
@@ -184,11 +217,7 @@ fn creates_named_temporary_files() -> Result<()> {
     let file = AtomicWriteFile::open(&path)?;
     let temp_file_name = list_temporary_files(path)
         .next()
-        .expect("no temporary files found")
-        .to_string_lossy()
-        .to_string();
-    assert!(temp_file_name.is_ascii());
-    assert!(temp_file_name.starts_with(".foo."));
-    assert_eq!(temp_file_name.len(), 1 + 3 + 1 + 6);
+        .expect("no temporary files found");
+    verify_temporary_file_name("foo", temp_file_name);
     file.commit()
 }
