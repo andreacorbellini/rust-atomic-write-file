@@ -29,6 +29,7 @@ jobs:
       - name: Lint
         run: |
           cargo clippy --release --all-targets
+          cargo fmt --check
 
   cargo-test-linux-overlayfs:
     name: Build and Test (Linux, overlayfs)
@@ -64,6 +65,7 @@ jobs:
       - name: Lint
         run: |
           cargo clippy --release --all-targets
+          cargo fmt --check
 
   cargo-test-windows:
     name: Build and Test (Windows)
@@ -80,6 +82,7 @@ jobs:
       - name: Lint
         run: |
           cargo clippy --release --all-targets
+          cargo fmt --check
 
   cargo-test-wasi:
     name: Build (wasi)
@@ -100,3 +103,4 @@ jobs:
       - name: Lint
         run: |
           cargo clippy --release --all-targets
+          cargo fmt --check
