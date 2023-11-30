@@ -80,7 +80,7 @@
 //! and then replacing the destination file with the temporary file once the new contents are fully
 //! written to the filesystem.
 //!
-//! On Unix, the implementation is roughly equivalent to this pseudocode:
+//! On **Unix**, the implementation is roughly equivalent to this pseudocode:
 //!
 //! ```text
 //! fd = open("/path/to/directory/.filename.XXXXXX", O_WRONLY | O_CLOEXEC);
@@ -89,16 +89,17 @@
 //! rename("/path/to/directory/.filename.XXXXXX", "/path/to/directory/filename");
 //! ```
 //!
-//! Where `XXXXXX` represents a random suffix. On other non-Unix platforms, the implementation is
+//! Where `XXXXXX` represents a random suffix. On **non-Unix** platforms, the implementation is
 //! similar and uses the equivalent platform-specific system calls.
 //!
-//! On Unix, the actual implementation is more robust and makes use of directory file descriptors
-//! (and the system calls `openat`, `linkat`, `renameat`) to make sure that, if the directory is
-//! renamed or remounted during the operations, the file still ends up in the original destination
-//! directory, and no cross-device writes happen.
+//! On **Unix**, the actual implementation is more robust and makes use of directory file
+//! descriptors (and the system calls `openat`, `linkat`, `renameat`) to make sure that, if the
+//! directory is renamed or remounted during the operations, the file still ends up in the original
+//! destination directory, and no cross-device writes happen.
 //!
-//! On Linux, the implementation makes use of anonymous temporary files (opened with `O_TMPFILE`),
-//! and the implementation is roughly equivalent to this pseudocode:
+//! On **Linux**, the implementation makes use of anonymous temporary files (opened with
+//! [`O_TMPFILE`](https://www.man7.org/linux/man-pages/man2/open.2.html)) if supported, and the
+//! implementation is roughly equivalent to this pseudocode:
 //!
 //! ```text
 //! fd = open("/path/to/directory", O_TMPFILE | O_WRONLY | O_CLOEXEC);
@@ -108,7 +109,7 @@
 //! rename("/path/to/directory/.filename.XXXXXX", "/path/to/directory/filename");
 //! ```
 //!
-//! This Linux-specific behavior is controlled by the `unnamed-tmpfile` feature of this Crate,
+//! This **Linux**-specific behavior is controlled by the `unnamed-tmpfile` feature of this Crate,
 //! which is enabled by default.
 //!
 //! ## Notes and Limitations
