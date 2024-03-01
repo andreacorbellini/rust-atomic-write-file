@@ -1,5 +1,13 @@
 # Changelog
 
+## atomic-write-file 0.1.3
+
+### Unix changes
+
+* Update dependency on `nix` to version 0.28. This improves compatibility with
+  Illumos, Solaris, and Solaris-like operating systems. (contributed by
+  [Rain](https://github.com/andreacorbellini/rust-atomic-write-file/pull/5)).
+
 ## atomic-write-file 0.1.2
 
 ### Linux changes
