@@ -167,7 +167,12 @@ fn create_temporary_file(
 
     let mut random_name = RandomName::new(name);
     let file_fd = loop {
-        match openat(dir.as_raw_fd(), random_name.next(), flags, create_mode) {
+        match openat(
+            Some(dir.as_raw_fd()),
+            random_name.next(),
+            flags,
+            create_mode,
+        ) {
             Ok(file_fd) => break file_fd,
             Err(Errno::EEXIST) => continue,
             Err(err) => return Err(err),
@@ -219,7 +224,7 @@ fn copy_file_perms<P: AsRef<Path>>(
     opts: &OpenOptions,
 ) -> Result<()> {
     let stat = match fstatat(
-        dir.as_raw_fd(),
+        Some(dir.as_raw_fd()),
         copy_from.as_ref(),
         AtFlags::AT_SYMLINK_NOFOLLOW,
     ) {

@@ -7,11 +7,11 @@ use crate::imp::unix::OpenOptions;
 use crate::imp::unix::RandomName;
 use nix::errno::Errno;
 use nix::fcntl::openat;
+use nix::fcntl::AtFlags;
 use nix::fcntl::OFlag;
 use nix::libc;
 use nix::sys::stat::Mode;
 use nix::unistd::linkat;
-use nix::unistd::LinkatFlags;
 use std::ffi::OsStr;
 use std::ffi::OsString;
 use std::fs::File;
@@ -32,7 +32,7 @@ fn create_unnamed_temporary_file(dir: &Dir, opts: &OpenOptions) -> nix::Result<F
         | OFlag::from_bits_truncate(opts.custom_flags & !libc::O_ACCMODE);
     let create_mode = Mode::from_bits_truncate(opts.mode);
 
-    let file_fd = openat(dir.as_raw_fd(), ".", flags, create_mode)?;
+    let file_fd = openat(Some(dir.as_raw_fd()), ".", flags, create_mode)?;
 
     let file = unsafe { File::from_raw_fd(file_fd) };
     Ok(file)
@@ -49,7 +49,7 @@ fn rename_unnamed_temporary_file(dir: &Dir, file: &File, name: &OsStr) -> nix::R
             src.as_os_str(),
             Some(dir.as_raw_fd()),
             random_name.next(),
-            LinkatFlags::SymlinkFollow,
+            AtFlags::AT_SYMLINK_FOLLOW,
         ) {
             Ok(()) => break random_name.into_os_string(),
             Err(Errno::EEXIST) => continue,
