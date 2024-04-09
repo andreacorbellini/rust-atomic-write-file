@@ -28,7 +28,7 @@ jobs:
           cargo test --target ${{ matrix.target }} --release --verbose
       - name: Lint
         run: |
-          cargo clippy --release --all-targets
+          cargo clippy --all-targets
           cargo fmt --check
 
   cargo-test-linux-overlayfs:
@@ -64,7 +64,7 @@ jobs:
           cargo test --release --verbose
       - name: Lint
         run: |
-          cargo clippy --release --all-targets
+          cargo clippy --all-targets
           cargo fmt --check
 
   cargo-test-windows:
@@ -81,7 +81,7 @@ jobs:
           cargo test --release --verbose
       - name: Lint
         run: |
-          cargo clippy --release --all-targets
+          cargo clippy --all-targets
           cargo fmt --check
 
   cargo-test-wasi:
@@ -102,5 +102,5 @@ jobs:
           cargo wasi build --release --verbose
       - name: Lint
         run: |
-          cargo clippy --release --all-targets
+          cargo clippy --all-targets
           cargo fmt --check
