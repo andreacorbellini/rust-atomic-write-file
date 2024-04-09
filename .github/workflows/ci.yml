@@ -119,7 +119,7 @@ jobs:
       - name: Build and Test
         run: |
           export TEST_DIR=$RUNNER_TEMP
-          cargo test-all-features --release --verbose
+          cargo +nightly test-all-features --release --verbose
       - name: Lint
         run: |
-          cargo check-all-features --all-targets
+          cargo +nightly check-all-features --all-targets
