@@ -165,6 +165,15 @@
 #![warn(unused_crate_dependencies)]
 #![warn(unused_qualifications)]
 #![doc(test(attr(deny(warnings))))]
+#![cfg_attr(feature = "unstable-can_vector", feature(can_vector))]
+#![cfg_attr(feature = "unstable-read_buf", feature(core_io_borrowed_buf))]
+#![cfg_attr(feature = "unstable-read_buf", feature(read_buf))]
+#![cfg_attr(feature = "unstable-seek_stream_len", feature(seek_stream_len))]
+#![cfg_attr(
+    feature = "unstable-unix_file_vectored_at",
+    feature(unix_file_vectored_at)
+)]
+#![cfg_attr(feature = "unstable-write_all_vectored", feature(write_all_vectored))]
 
 use std::fmt::Arguments;
 use std::fs::File;
@@ -731,7 +740,7 @@ impl Write for AtomicWriteFile {
     }
 
     #[inline]
-    #[cfg(feature = "unstable-can_vector")]
+    #[cfg(feature = "unstable-write_all_vectored")]
     fn write_all_vectored(&mut self, bufs: &mut [IoSlice<'_>]) -> Result<()> {
         self.temporary_file.file.write_all_vectored(bufs)
     }
@@ -770,7 +779,7 @@ impl Write for &AtomicWriteFile {
     }
 
     #[inline]
-    #[cfg(feature = "unstable-can_vector")]
+    #[cfg(feature = "unstable-write_all_vectored")]
     fn write_all_vectored(&mut self, bufs: &mut [IoSlice<'_>]) -> Result<()> {
         (&self.temporary_file.file).write_all_vectored(bufs)
     }
