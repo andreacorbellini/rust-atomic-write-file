@@ -104,3 +104,22 @@ jobs:
         run: |
           cargo clippy --all-targets
           cargo fmt --check
+
+  cargo-test-all-features:
+    name: Build and Test (all features combinations)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+      - name: Install cargo-all-features
+        run: |
+          cargo install --locked cargo-all-features
+      - name: Build and Test
+        run: |
+          export TEST_DIR=$RUNNER_TEMP
+          cargo test-all-features --release --verbose
+      - name: Lint
+        run: |
+          cargo check-all-features --all-targets
