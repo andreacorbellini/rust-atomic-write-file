@@ -1,0 +1,49 @@
+name: Crash Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  linux-crash-test:
+    name: Linux Crash Test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        fstype:
+          - btrfs
+          - ext3
+          - ext4
+          - xfs
+        features:
+          - ''
+          - 'unnamed-tmpfile'
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - name: Install qemu
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-system-x86
+      - name: Install ${{ matrix.fstype }} tools
+        run: |
+          sudo apt-get update
+          case ${{ matrix.fstype }} in
+            btrfs) sudo apt-get install -y btrfs-progs ;;
+            ext*)  sudo apt-get install -y e2fsprogs   ;;
+            xfs)   sudo apt-get install -y xfsprogs    ;;
+          esac
+      - name: Copy current kernel
+        run: |
+          sudo cp "/boot/vmlinuz-$(uname -r)" .
+          sudo chmod a+r "vmlinuz-$(uname -r)"
+      - name: Run test
+        run: |
+          crash-tests/linux/run-test.sh --kernel="vmlinuz-$(uname -r)" --filesystem-type="${{ matrix.fstype }}" --cargo-features="${{ matrix.features }}"
