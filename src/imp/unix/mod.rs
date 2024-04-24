@@ -10,6 +10,7 @@ use nix::sys::stat::fstatat;
 use nix::sys::stat::mode_t;
 use nix::sys::stat::Mode;
 use nix::unistd::fchown;
+use nix::unistd::fdatasync;
 use nix::unistd::unlinkat;
 use nix::unistd::Gid;
 use nix::unistd::Uid;
@@ -200,7 +201,8 @@ fn rename_temporary_file(dir: &Dir, temporary_name: &OsStr, name: &OsStr) -> nix
         temporary_name,
         Some(dir.as_raw_fd()),
         name,
-    )
+    )?;
+    fdatasync(dir.as_raw_fd())
 }
 
 fn remove_temporary_file(dir: &Dir, temporary_name: &OsStr) -> nix::Result<()> {
@@ -208,7 +210,8 @@ fn remove_temporary_file(dir: &Dir, temporary_name: &OsStr) -> nix::Result<()> {
         Some(dir.as_raw_fd()),
         temporary_name,
         UnlinkatFlags::NoRemoveDir,
-    )
+    )?;
+    fdatasync(dir.as_raw_fd())
 }
 
 fn maybe_ignore_eperm(result: nix::Result<()>, preserve: Preserve) -> nix::Result<()> {
