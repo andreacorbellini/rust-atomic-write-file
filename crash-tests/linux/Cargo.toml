@@ -7,7 +7,6 @@ edition = "2021"
 
 [dependencies]
 atomic-write-file = { path = "../.." }
-nix = "0.28.0"
 
 [features]
 unnamed-tmpfile = ["atomic-write-file/unnamed-tmpfile"]
