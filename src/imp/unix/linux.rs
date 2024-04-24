@@ -11,6 +11,7 @@ use nix::fcntl::AtFlags;
 use nix::fcntl::OFlag;
 use nix::libc;
 use nix::sys::stat::Mode;
+use nix::unistd::fdatasync;
 use nix::unistd::linkat;
 use std::ffi::OsStr;
 use std::ffi::OsString;
@@ -56,6 +57,13 @@ fn rename_unnamed_temporary_file(dir: &Dir, file: &File, name: &OsStr) -> nix::R
             Err(err) => return Err(err),
         }
     };
+
+    // The file is supposed to be already synced by `AtomicWriteFile::_commit()`, however on some
+    // filesystems (notably, btrfs), syncs are ignored for unnamed temporary files, hence we sync
+    // again for safety.
+    //
+    // See https://github.com/andreacorbellini/rust-atomic-write-file/issues/6 for more details.
+    fdatasync(file.as_raw_fd())?;
 
     rename_temporary_file(dir, &temporary_name, name)
 }
