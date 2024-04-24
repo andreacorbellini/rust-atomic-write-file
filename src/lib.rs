@@ -1,5 +1,3 @@
-//! # Atomic Write File
-//!
 //! This crate offers functionality to write and overwrite files *atomically*, that is: without
 //! leaving the file in an intermediate state. Either the new contents of the files are written to
 //! the filesystem, or the old contents (if any) are preserved.
@@ -9,7 +7,7 @@
 //!
 //! This crate supports all major platforms, including: Unix systems, Windows, and WASI.
 //!
-//! ## Motivation and Example
+//! # Motivation and Example
 //!
 //! Consider the following snippet of code to write a configuration file in JSON format:
 //!
@@ -74,7 +72,7 @@
 //! `config.json` will be left untouched. Only if the new contents are fully written to the
 //! filesystem, `config.json` will get them.
 //!
-//! ## How it works
+//! # How it works
 //!
 //! This crate works by creating a temporary file in the same directory as the destination file,
 //! and then replacing the destination file with the temporary file once the new contents are fully
@@ -97,7 +95,7 @@
 //! directory is renamed or remounted during the operations, the file still ends up in the original
 //! destination directory, and no cross-device writes happen.
 //!
-//! ## Notes and Limitations
+//! # Notes and Limitations
 //!
 //! * If the path of an [`AtomicWriteFile`] is a directory or a file that cannot be removed (due to
 //!   permissions or special attributes), an error will be produced when the [`AtomicWriteFile`] is
@@ -143,9 +141,9 @@
 //!     Lists), Linux extended attributes (xattrs), or SELinux contexts. Support may be added in
 //!     the future.
 //!
-//! ## Cargo features
+//! # Cargo features
 //!
-//! ### `unnamed-tmpfile` (Linux only)
+//! ## `unnamed-tmpfile` (Linux only)
 //!
 //! As explained in [how it works](#how-it-works), this crate works by creating a temporary file,
 //! which is then renamed at commit time. By default, the temporary file has a path on the
