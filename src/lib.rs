@@ -97,21 +97,6 @@
 //! directory is renamed or remounted during the operations, the file still ends up in the original
 //! destination directory, and no cross-device writes happen.
 //!
-//! On **Linux**, the implementation makes use of anonymous temporary files (opened with
-//! [`O_TMPFILE`](https://www.man7.org/linux/man-pages/man2/open.2.html)) if supported, and the
-//! implementation is roughly equivalent to this pseudocode:
-//!
-//! ```text
-//! fd = open("/path/to/directory", O_TMPFILE | O_WRONLY | O_CLOEXEC);
-//! /* ... write contents ... */
-//! fsync(fd);
-//! link("/proc/self/fd/$fd", "/path/to/directory/.filename.XXXXXX");
-//! rename("/path/to/directory/.filename.XXXXXX", "/path/to/directory/filename");
-//! ```
-//!
-//! This **Linux**-specific behavior is controlled by the `unnamed-tmpfile` feature of this Crate,
-//! which is enabled by default.
-//!
 //! ## Notes and Limitations
 //!
 //! * If the path of an [`AtomicWriteFile`] is a directory or a file that cannot be removed (due to
@@ -157,6 +142,36 @@
 //!   * On all platforms, there is no support for preserving timestamps, ACLs (POSIX Access Control
 //!     Lists), Linux extended attributes (xattrs), or SELinux contexts. Support may be added in
 //!     the future.
+//!
+//! ## Cargo features
+//!
+//! ### `unnamed-tmpfile` (Linux only)
+//!
+//! As explained in [how it works](#how-it-works), this crate works by creating a temporary file,
+//! which is then renamed at commit time. By default, the temporary file has a path on the
+//! filesystem, and as such if a crash occurs, there is a chance that the temporary file may be
+//! left on the filesystem.
+//!
+//! On **Linux**, the implementation of this crate can make use of anonymous temporary files (files
+//! opened with [`O_TMPFILE`](https://www.man7.org/linux/man-pages/man2/open.2.html)) if supported,
+//! and the implementation is roughly equivalent to this pseudocode:
+//!
+//! ```text
+//! fd = open("/path/to/directory", O_TMPFILE | O_WRONLY | O_CLOEXEC);
+//! /* ... write contents ... */
+//! fsync(fd);
+//! link("/proc/self/fd/$fd", "/path/to/directory/.filename.XXXXXX");
+//! rename("/path/to/directory/.filename.XXXXXX", "/path/to/directory/filename");
+//! ```
+//!
+//! This **Linux**-specific behavior is controlled by the `unnamed-tmpfile` feature of this Crate,
+//! which is disabled by default. To enable it, modify your `Crate.toml` so that it looks like the
+//! following:
+//!
+//! ```toml
+//! [dependencies]
+//! atomic-write-file = { version = "0.2", features = ["unnamed-tmpfile"] }
+//! ```
 
 #![warn(missing_debug_implementations)]
 #![warn(missing_docs)]
