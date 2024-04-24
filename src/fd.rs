@@ -12,6 +12,7 @@ impl AsFd for AtomicWriteFile {
 }
 
 impl AsRawFd for AtomicWriteFile {
+    #[inline]
     fn as_raw_fd(&self) -> RawFd {
         self.temporary_file.file.as_raw_fd()
     }
