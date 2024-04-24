@@ -20,7 +20,9 @@ use std::ffi::OsStr;
 use std::ffi::OsString;
 use std::fs::File;
 use std::io::Result;
+use std::os::fd::AsFd;
 use std::os::fd::AsRawFd;
+use std::os::fd::BorrowedFd;
 use std::os::fd::FromRawFd;
 use std::os::fd::OwnedFd;
 use std::os::fd::RawFd;
@@ -100,7 +102,15 @@ impl Dir {
     }
 }
 
+impl AsFd for Dir {
+    #[inline]
+    fn as_fd(&self) -> BorrowedFd<'_> {
+        self.fd.as_fd()
+    }
+}
+
 impl AsRawFd for Dir {
+    #[inline]
     fn as_raw_fd(&self) -> RawFd {
         self.fd.as_raw_fd()
     }

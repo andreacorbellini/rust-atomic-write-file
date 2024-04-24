@@ -77,6 +77,31 @@ impl TemporaryFile {
     pub(crate) fn remove_file(&self) -> Result<()> {
         fs::remove_file(&self.temp_path)
     }
+
+    #[inline]
+    pub(crate) fn directory(&self) -> Option<&Dir> {
+        None
+    }
+}
+
+// An enum without variants, so that it can never be constructed
+#[derive(Debug)]
+pub(crate) enum Dir {}
+
+#[cfg(any(unix, target_os = "wasi"))]
+impl std::os::fd::AsFd for Dir {
+    #[inline]
+    fn as_fd(&self) -> std::os::fd::BorrowedFd<'_> {
+        unreachable!()
+    }
+}
+
+#[cfg(any(unix, target_os = "wasi"))]
+impl std::os::fd::AsRawFd for Dir {
+    #[inline]
+    fn as_raw_fd(&self) -> std::os::fd::RawFd {
+        unreachable!()
+    }
 }
 
 struct RandomName<'a> {

@@ -52,4 +52,9 @@ impl TemporaryFile {
         remove_temporary_file(&self.dir, &self.temporary_name)?;
         Ok(())
     }
+
+    #[inline]
+    pub(crate) fn directory(&self) -> Option<&Dir> {
+        Some(&self.dir)
+    }
 }

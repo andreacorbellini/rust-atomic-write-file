@@ -206,6 +206,9 @@ use std::io::BorrowedCursor;
 
 mod imp;
 
+mod dir;
+pub use dir::Directory;
+
 #[cfg(any(unix, target_os = "wasi"))]
 mod fd;
 
@@ -527,6 +530,47 @@ impl AtomicWriteFile {
     #[inline]
     pub fn as_file_mut(&mut self) -> &mut File {
         &mut self.temporary_file.file
+    }
+
+    /// Returns a borrowed reference to the directory containing the file.
+    ///
+    /// This method allows you to obtain the directory file descriptor, without having to open it
+    /// through a call to `open(2)`. This method is guaranteed to make no system calls.
+    ///
+    /// The returned struct supports only two operations:
+    /// - conversion to a borrowed directory file descriptor through [`AsFd::as_fd()`]
+    /// - conversion to a raw directory file descriptor through [`AsRawFd::as_raw_fd()`]
+    ///
+    /// This method will return a result only if the platform supports directory file descriptors,
+    /// and if the `AtomicWriteFile` implementation makes use of them. In all other cases, this
+    /// method returns `None`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # fn main() -> std::io::Result<()> {
+    /// # let test_dir = option_env!("TEST_DIR").unwrap_or("target/test-files");
+    /// # std::fs::create_dir_all(&test_dir).expect("failed to create test dir");
+    /// # std::env::set_current_dir(test_dir).expect("failed to move to test dir");
+    /// # #[cfg(any(unix, target_os = "wasi"))]
+    /// use std::os::fd::AsFd;
+    /// use atomic_write_file::AtomicWriteFile;
+    ///
+    /// let file = AtomicWriteFile::open("foo.txt")?;
+    /// if let Some(dir) = file.directory() {
+    /// #   #[cfg(any(unix, target_os = "wasi"))]
+    ///     let borrowed_fd = dir.as_fd();
+    /// #   #[cfg(any(unix, target_os = "wasi"))]
+    ///     println!("directory fd: {:?}", borrowed_fd);
+    /// #   #[cfg(not(any(unix, target_os = "wasi")))]
+    /// #   let _ = dir;
+    /// }
+    /// # Ok(())
+    /// # }
+    /// ```
+    #[inline]
+    pub fn directory(&self) -> Option<Directory<'_>> {
+        self.temporary_file.directory().map(Directory::new)
     }
 
     /// Saves the contents of this file to its path.

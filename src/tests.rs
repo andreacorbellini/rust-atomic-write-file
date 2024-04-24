@@ -221,3 +221,32 @@ fn creates_named_temporary_files() -> Result<()> {
     verify_temporary_file_name("foo", temp_file_name);
     file.commit()
 }
+
+#[test]
+#[cfg(unix)]
+fn supports_directory_fd() -> Result<()> {
+    use std::os::fd::AsFd;
+    use std::os::fd::AsRawFd;
+
+    let path = test_file("foo");
+    let file = AtomicWriteFile::open(path)?;
+    let dir = file.directory().expect("no directory descriptor returned");
+    assert_eq!(dir.as_fd().as_raw_fd(), dir.as_raw_fd());
+    // Try to do an operation with the file descriptor to ensure it's valid
+    dir.as_fd()
+        .try_clone_to_owned()
+        .expect("duplicating directory file descriptor failed");
+    Ok(())
+}
+
+#[test]
+#[cfg(not(unix))]
+fn doesnt_support_directory_fd() -> Result<()> {
+    let path = test_file("foo");
+    let file = AtomicWriteFile::open(path)?;
+    assert!(
+        file.directory().is_none(),
+        "directory descriptor returned, expected none"
+    );
+    Ok(())
+}

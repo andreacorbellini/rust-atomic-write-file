@@ -123,4 +123,9 @@ impl TemporaryFile {
         }
         Ok(())
     }
+
+    #[inline]
+    pub(crate) fn directory(&self) -> Option<&Dir> {
+        Some(&self.dir)
+    }
 }
