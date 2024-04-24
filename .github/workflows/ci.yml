@@ -126,3 +126,17 @@ jobs:
       - name: Lint
         run: |
           cargo +nightly check-all-features --all-targets
+
+  lint-crash-tests:
+    name: Lint Crash Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - name: Lint
+        run: |
+          cd crash-tests/linux
+          cargo clippy --all-targets
+          cargo fmt --check
