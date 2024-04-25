@@ -1,5 +1,14 @@
 # Changelog
 
+## atomic-write-file 0.1.4
+
+### Linux changes
+
+* Fix a potential data loss problem with anonymous temporary files on btrfs
+  (see [GitHub issue
+  #6](https://github.com/andreacorbellini/rust-atomic-write-file/issues/6) for
+  details).
+
 ## atomic-write-file 0.1.3
 
 ### Unix changes
