@@ -10,7 +10,7 @@ use std::panic;
 use std::path::Path;
 use std::path::PathBuf;
 
-fn test_directory() -> PathBuf {
+pub(crate) fn test_directory() -> PathBuf {
     let path = option_env!("TEST_DIR").unwrap_or("target/test-files");
     println!("using test directory: {path:?}");
     fs::create_dir_all(path)
@@ -18,7 +18,7 @@ fn test_directory() -> PathBuf {
     path.into()
 }
 
-fn test_file<P: AsRef<Path>>(name: P) -> PathBuf {
+pub(crate) fn test_file<P: AsRef<Path>>(name: P) -> PathBuf {
     let mut path = test_directory();
     path.push(name);
     match fs::remove_file(&path) {
@@ -29,7 +29,7 @@ fn test_file<P: AsRef<Path>>(name: P) -> PathBuf {
     path
 }
 
-fn list_temporary_files<P: AsRef<Path>>(path: P) -> impl Iterator<Item = PathBuf> {
+pub(crate) fn list_temporary_files<P: AsRef<Path>>(path: P) -> impl Iterator<Item = PathBuf> {
     let path = path.as_ref();
     let dir_path = path.parent().unwrap();
     let file_name = path.file_name().unwrap();
@@ -54,7 +54,7 @@ fn list_temporary_files<P: AsRef<Path>>(path: P) -> impl Iterator<Item = PathBuf
     })
 }
 
-fn verify_temporary_file_name<P1: AsRef<Path>, P2: AsRef<Path>>(
+pub(crate) fn verify_temporary_file_name<P1: AsRef<Path>, P2: AsRef<Path>>(
     dst_file_name: P1,
     temp_file_name: P2,
 ) {
@@ -70,7 +70,7 @@ fn verify_temporary_file_name<P1: AsRef<Path>, P2: AsRef<Path>>(
     );
 }
 
-fn verify_no_leftovers<P: AsRef<Path>>(path: P) {
+pub(crate) fn verify_no_leftovers<P: AsRef<Path>>(path: P) {
     let leftovers = list_temporary_files(path).collect::<Vec<PathBuf>>();
     if !leftovers.is_empty() {
         panic!("found leftover files: {leftovers:?}");

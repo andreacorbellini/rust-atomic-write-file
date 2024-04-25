@@ -14,6 +14,8 @@ categories = ["filesystem"]
 [dependencies]
 rand = { version = "0.8" }
 
+async-std = { version = "1.12", optional = true }
+
 [target.'cfg(unix)'.dependencies]
 nix = { version = "0.28", features = ["fs", "user"] }
 

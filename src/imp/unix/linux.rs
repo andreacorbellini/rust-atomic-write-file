@@ -39,7 +39,10 @@ fn create_unnamed_temporary_file(dir: &Dir, opts: &OpenOptions) -> nix::Result<F
     Ok(file)
 }
 
-fn rename_unnamed_temporary_file(dir: &Dir, file: &File, name: &OsStr) -> nix::Result<()> {
+fn rename_unnamed_temporary_file<F>(dir: &Dir, file: &F, name: &OsStr) -> nix::Result<()>
+where
+    F: AsRawFd,
+{
     let fd = file.as_raw_fd();
     let src = OsString::from(format!("/proc/self/fd/{fd}"));
     let mut random_name = RandomName::new(name);
@@ -69,9 +72,9 @@ fn rename_unnamed_temporary_file(dir: &Dir, file: &File, name: &OsStr) -> nix::R
 }
 
 #[derive(Debug)]
-pub(crate) struct TemporaryFile {
+pub(crate) struct TemporaryFile<F = File> {
     pub(crate) dir: Dir,
-    pub(crate) file: File,
+    pub(crate) file: F,
     pub(crate) name: OsString,
     pub(crate) temporary_name: Option<OsString>,
 }
@@ -106,6 +109,8 @@ impl TemporaryFile {
             copy_file_perms(&dir, &name, &file, opts)?;
         }
 
+        let file = file.into();
+
         Ok(Self {
             dir,
             file,
@@ -113,8 +118,13 @@ impl TemporaryFile {
             temporary_name,
         })
     }
+}
 
-    pub(crate) fn rename_file(&self) -> Result<()> {
+impl<F> TemporaryFile<F> {
+    pub(crate) fn rename_file(&self) -> Result<()>
+    where
+        F: AsRawFd,
+    {
         match self.temporary_name {
             None => rename_unnamed_temporary_file(&self.dir, &self.file, &self.name)?,
             Some(ref temporary_name) => {
@@ -135,5 +145,21 @@ impl TemporaryFile {
     #[inline]
     pub(crate) fn directory(&self) -> Option<&Dir> {
         Some(&self.dir)
+    }
+}
+
+#[cfg(feature = "async-std")]
+impl<F> TemporaryFile<F> {
+    #[inline]
+    pub(crate) fn into<G>(self) -> TemporaryFile<G>
+    where
+        G: From<F>,
+    {
+        TemporaryFile::<G> {
+            dir: self.dir,
+            file: self.file.into(),
+            name: self.name,
+            temporary_name: self.temporary_name,
+        }
     }
 }

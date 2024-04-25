@@ -33,10 +33,10 @@ impl Default for OpenOptions {
 }
 
 #[derive(Debug)]
-pub(crate) struct TemporaryFile {
+pub(crate) struct TemporaryFile<F = File> {
     pub(crate) temp_path: PathBuf,
     pub(crate) dest_path: PathBuf,
-    pub(crate) file: File,
+    pub(crate) file: F,
 }
 
 impl TemporaryFile {
@@ -69,7 +69,9 @@ impl TemporaryFile {
             file,
         })
     }
+}
 
+impl<F> TemporaryFile<F> {
     pub(crate) fn rename_file(&self) -> Result<()> {
         fs::rename(&self.temp_path, &self.dest_path)
     }
@@ -81,6 +83,21 @@ impl TemporaryFile {
     #[inline]
     pub(crate) fn directory(&self) -> Option<&Dir> {
         None
+    }
+}
+
+#[cfg(feature = "async-std")]
+impl<F> TemporaryFile<F> {
+    #[inline]
+    pub(crate) fn into<G>(self) -> TemporaryFile<G>
+    where
+        G: From<F>,
+    {
+        TemporaryFile::<G> {
+            temp_path: self.temp_path,
+            dest_path: self.dest_path,
+            file: self.file.into(),
+        }
     }
 }
 

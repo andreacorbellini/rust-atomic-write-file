@@ -207,6 +207,9 @@ mod fd;
 #[cfg(unix)]
 pub mod unix;
 
+#[cfg(feature = "async-std")]
+pub mod future;
+
 #[cfg(test)]
 mod tests;
 

@@ -11,9 +11,9 @@ use std::io::Result;
 use std::path::Path;
 
 #[derive(Debug)]
-pub(crate) struct TemporaryFile {
+pub(crate) struct TemporaryFile<F = File> {
     pub(crate) dir: Dir,
-    pub(crate) file: File,
+    pub(crate) file: F,
     pub(crate) name: OsString,
     pub(crate) temporary_name: OsString,
 }
@@ -42,7 +42,9 @@ impl TemporaryFile {
             temporary_name,
         })
     }
+}
 
+impl<F> TemporaryFile<F> {
     pub(crate) fn rename_file(&self) -> Result<()> {
         rename_temporary_file(&self.dir, &self.temporary_name, &self.name)?;
         Ok(())
@@ -56,5 +58,21 @@ impl TemporaryFile {
     #[inline]
     pub(crate) fn directory(&self) -> Option<&Dir> {
         Some(&self.dir)
+    }
+}
+
+#[cfg(feature = "async-std")]
+impl<F> TemporaryFile<F> {
+    #[inline]
+    pub(crate) fn into<G>(self) -> TemporaryFile<G>
+    where
+        G: From<F>,
+    {
+        TemporaryFile::<G> {
+            dir: self.dir,
+            file: self.file.into(),
+            name: self.name,
+            temporary_name: self.temporary_name,
+        }
     }
 }
