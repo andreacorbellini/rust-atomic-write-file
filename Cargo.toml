@@ -1,6 +1,6 @@
 [package]
 name = "atomic-write-file"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["Andrea Corbellini <corbellini.andrea@gmail.com>"]
 edition = "2021"
 license = "BSD-3-Clause"
