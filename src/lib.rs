@@ -106,17 +106,6 @@
 //!   removed if an error (such as a panic) occurs. However, if the process is interrupted abruptly
 //!   (without unwinding or running destructors), temporary files may be left on the filesystem.
 //!
-//! * On Linux, with the `unnamed-tmpfile` feature (enabled by default), [`AtomicWriteFile`] uses
-//!   unnamed temporary files. This ensures that, if the process is interrupted abruptly *before* a
-//!   commit, the temporary file is automatically cleaned up by the operating system. However, if
-//!   the process is interrupted *during* a commit, it's still possible (although unlikely) that a
-//!   named temporary file will be left inside the destination directory.
-//!
-//! * On Linux, with the `unnamed-tmpfile` feature (enabled by default), [`AtomicWriteFile`]
-//!   requires the `/proc` filesystem to be mounted. This makes [`AtomicWriteFile`] unsuitable for
-//!   use in processes that run early at boot. Disable the `unnamed-tmpfile` feature if you need to
-//!   run your program in situations where `/proc` is not available.
-//!
 //! * If the path of an [`AtomicWriteFile`] is a symlink to another file, the symlink is replaced,
 //!   and the target of the original symlink is left untouched. If you intend to modify the file
 //!   pointed by a symlink at open time, call [`Path::canonicalize()`] prior to calling
@@ -162,14 +151,17 @@
 //! rename("/path/to/directory/.filename.XXXXXX", "/path/to/directory/filename");
 //! ```
 //!
-//! This **Linux**-specific behavior is controlled by the `unnamed-tmpfile` feature of this Crate,
-//! which is disabled by default. To enable it, modify your `Crate.toml` so that it looks like the
-//! following:
+//! This feature has the following limitations:
 //!
-//! ```toml
-//! [dependencies]
-//! atomic-write-file = { version = "0.2", features = ["unnamed-tmpfile"] }
-//! ```
+//! * The use of anonymous temporary files ensures that, if the process is interrupted abruptly
+//!   *before* a commit, the temporary file is automatically cleaned up by the operating system.
+//!   However, if the process is interrupted *during* a commit, it's still possible (although
+//!   unlikely) that a named temporary file will be left inside the destination directory.
+//!
+//! * This feature requires the `/proc` filesystem to be mounted. This makes [`AtomicWriteFile`]
+//!   with `unnamed-tmpfile` unsuitable for use in processes that run early at boot.
+//!
+//! This feature has no effect on platforms other than Linux.
 
 #![warn(missing_debug_implementations)]
 #![warn(missing_docs)]
