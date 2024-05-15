@@ -25,9 +25,7 @@ jobs:
           - 'unnamed-tmpfile'
     steps:
       - uses: actions/checkout@v4
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
+      - uses: dtolnay/rust-toolchain@stable
       - name: Install qemu
         run: |
           sudo apt-get update

@@ -21,10 +21,9 @@ jobs:
           - unnamed-tmpfile
     steps:
       - uses: actions/checkout@v4
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-          target: ${{ matrix.target }}
+          targets: ${{ matrix.target }}
       - name: Build and Test
         run: |
           export TEST_DIR=$RUNNER_TEMP
@@ -39,9 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
+      - uses: dtolnay/rust-toolchain@stable
       - name: Build and Test
         run: |
           mkdir $RUNNER_TEMP/lower
@@ -58,9 +55,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
+      - uses: dtolnay/rust-toolchain@stable
       - name: Build and Test
         run: |
           export TEST_DIR=$RUNNER_TEMP
@@ -75,9 +70,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
+      - uses: dtolnay/rust-toolchain@stable
       - name: Build and Test
         run: |
           set TEST_DIR=%RUNNER_TEMP%
@@ -92,14 +85,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: stable
-          target: wasm32-wasi
-      - uses: actions-rs/install@v0.1
-        with:
-          crate: cargo-wasi
-          version: latest
+          targets: wasm32-wasi
+      - name: Install cargo-wasi
+        run: |
+          cargo install --locked cargo-wasi
       - name: Build
         run: |
           cargo wasi build --release --verbose
@@ -113,9 +104,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
+      - uses: dtolnay/rust-toolchain@nightly
       - name: Install cargo-all-features
         run: |
           cargo install --locked cargo-all-features
@@ -132,9 +121,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
+      - uses: dtolnay/rust-toolchain@stable
       - name: Lint
         run: |
           cd crash-tests/linux
