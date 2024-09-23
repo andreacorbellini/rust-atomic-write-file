@@ -163,7 +163,12 @@
 //!
 //! This feature has no effect on platforms other than Linux.
 
+#![warn(clippy::dbg_macro)]
+#![warn(clippy::print_stderr)]
+#![warn(clippy::print_stdout)]
 #![warn(missing_debug_implementations)]
+#![warn(unnameable_types)]
+#![warn(unused_macro_rules)]
 #![warn(missing_docs)]
 #![warn(unreachable_pub)]
 #![warn(unused_crate_dependencies)]
