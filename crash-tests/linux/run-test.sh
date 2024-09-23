@@ -23,7 +23,8 @@ initramfs_build_dir=$build_dir/rootfs
 initramfs=$build_dir/rootfs.img
 testfs=$build_dir/testfs.img
 output=$build_dir/output.txt
-test_bin=$build_dir/cargo/release/atomic-write-file-test
+target=$(uname -m)-unknown-linux-gnu
+test_bin=$build_dir/cargo/$target/release/atomic-write-file-test
 
 options=$(getopt --name "$0" --options k:m:f:F: --long kernel:,modules:,filesystem-type:,cargo-features: -- "$@")
 
@@ -69,7 +70,7 @@ cd "$(dirname "$(readlink -f "$0")")"
 #
 
 echo "${status}Compiling${reset} static binary at $test_bin"
-RUSTFLAGS='-C target-feature=+crt-static' CARGO_TARGET_DIR=$build_dir/cargo cargo build --release --features "$cargo_features"
+RUSTFLAGS='-C target-feature=+crt-static' CARGO_TARGET_DIR=$build_dir/cargo cargo build --release --features "$cargo_features" --target "$target"
 
 #
 # Create the root filesystem and put it into an initramfs
