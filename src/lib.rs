@@ -534,8 +534,10 @@ impl AtomicWriteFile {
     /// through a call to `open(2)`. This method is guaranteed to make no system calls.
     ///
     /// The returned struct supports only two operations:
-    /// - conversion to a borrowed directory file descriptor through [`AsFd::as_fd()`]
-    /// - conversion to a raw directory file descriptor through [`AsRawFd::as_raw_fd()`]
+    /// - conversion to a borrowed directory file descriptor through
+    ///   [`AsFd::as_fd()`](std::os::fd::AsFd::as_fd)
+    /// - conversion to a raw directory file descriptor through
+    ///   [`AsRawFd::as_raw_fd()`](std::os::fd::AsRawFd::as_raw_fd)
     ///
     /// This method will return a result only if the platform supports directory file descriptors,
     /// and if the `AtomicWriteFile` implementation makes use of them. In all other cases, this
