@@ -14,6 +14,13 @@ possible.
 This crate supports all major platforms, including: Unix systems, Windows, and
 WASI.
 
+**This crate is throughly tested to ensure the integrity of the files it
+creates.** In particular, it ships with tests that simulate kernel panics on
+Linux and check the file contents afterwards. You can see those tests in action
+on the [dedicated GitHub workflow].
+
+[dedicated GitHub workflow]: https://github.com/andreacorbellini/rust-atomic-write-file/actions/workflows/crash-tests.yml
+
 ## Motivation and Example
 
 Consider the following snippet of code to write a configuration file in JSON
