@@ -1,6 +1,6 @@
 # Atomic Write File
 
-[![Crate](https://img.shields.io/crates/v/atomic-write-file)](https://crates.io/crates/atomic-write-file) [![Documentation](https://img.shields.io/docsrs/atomic-write-file)](https://docs.rs/atomic-write-file/latest/atomic_write_file/) [![License](https://img.shields.io/crates/l/atomic-write-file)](https://choosealicense.com/licenses/bsd-3-clause/)
+[![Crate](https://img.shields.io/crates/v/atomic-write-file)](https://crates.io/crates/atomic-write-file) [![Documentation](https://img.shields.io/docsrs/atomic-write-file)](https://docs.rs/atomic-write-file/latest/atomic_write_file/) ![Build Status](https://img.shields.io/github/actions/workflow/status/andreacorbellini/rust-atomic-write-file/ci.yml) ![Crash Tests Status](https://img.shields.io/github/actions/workflow/status/andreacorbellini/rust-atomic-write-file/crash-tests.yml?label=crash%20tests) [![License](https://img.shields.io/crates/l/atomic-write-file)](https://choosealicense.com/licenses/bsd-3-clause/)
 
 This is a Rust crate that offers functionality to write and overwrite files
 *atomically*, that is: without leaving the file in an intermediate state.
