@@ -1,5 +1,9 @@
 # Changelog
 
+## atomic-write-file 0.2.1
+
+* Fixed some broken documentation links.
+
 ## atomic-write-file 0.2.0
 
 ### New features
