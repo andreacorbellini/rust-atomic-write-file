@@ -246,7 +246,8 @@ fn copy_file_perms<P: AsRef<Path>>(
         Err(err) => return Err(err.into()),
     };
     if opts.preserve_mode {
-        let mode = Mode::from_bits_retain(stat.st_mode);
+        #[allow(clippy::unnecessary_cast)]
+        let mode = Mode::from_bits_retain(stat.st_mode as mode_t);
         fchmod(copy_to.as_raw_fd(), mode)?;
     }
     if opts.preserve_owner.is_yes() {
