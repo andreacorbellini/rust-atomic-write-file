@@ -30,7 +30,7 @@ jobs:
           cargo test --target ${{ matrix.target }} --features ${{ matrix.features }} --release --verbose
       - name: Lint
         run: |
-          cargo clippy --all-targets
+          cargo clippy --all-targets -- --deny=warnings
           cargo fmt --check
 
   cargo-test-linux-overlayfs:
@@ -62,7 +62,7 @@ jobs:
           cargo test --release --verbose
       - name: Lint
         run: |
-          cargo clippy --all-targets
+          cargo clippy --all-targets -- --deny=warnings
           cargo fmt --check
 
   cargo-test-windows:
@@ -77,7 +77,7 @@ jobs:
           cargo test --release --verbose
       - name: Lint
         run: |
-          cargo clippy --all-targets
+          cargo clippy --all-targets -- --deny=warnings
           cargo fmt --check
 
   cargo-test-wasi:
@@ -96,7 +96,7 @@ jobs:
           cargo wasi build --release --verbose
       - name: Lint
         run: |
-          cargo clippy --all-targets
+          cargo clippy --all-targets -- --deny=warnings
           cargo fmt --check
 
   cross-test:
@@ -195,5 +195,5 @@ jobs:
       - name: Lint
         run: |
           cd crash-tests/linux
-          cargo clippy --all-targets
+          cargo clippy --all-targets -- --deny=warnings
           cargo fmt --check
