@@ -99,6 +99,76 @@ jobs:
           cargo clippy --all-targets
           cargo fmt --check
 
+  cross-test:
+    name: Build and Test (${{ matrix.target }}, using cross-compilation)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - aarch64-unknown-linux-gnu
+          - aarch64-unknown-linux-musl
+          - arm-linux-androideabi
+          - arm-unknown-linux-gnueabi
+          - arm-unknown-linux-gnueabihf
+          - arm-unknown-linux-musleabi
+          - arm-unknown-linux-musleabihf
+          - armv5te-unknown-linux-gnueabi
+          - armv5te-unknown-linux-musleabi
+          - armv7-linux-androideabi
+          - armv7-unknown-linux-gnueabi
+          - armv7-unknown-linux-gnueabihf
+          - armv7-unknown-linux-musleabi
+          - armv7-unknown-linux-musleabihf
+          - i586-unknown-linux-gnu
+          - i586-unknown-linux-musl
+          - i686-unknown-linux-gnu
+          - powerpc-unknown-linux-gnu
+          - powerpc64-unknown-linux-gnu
+          - powerpc64le-unknown-linux-gnu
+          - riscv64gc-unknown-linux-gnu
+          - s390x-unknown-linux-gnu
+          - sparc64-unknown-linux-gnu
+          - thumbv7neon-linux-androideabi
+          - thumbv7neon-unknown-linux-gnueabihf
+          - x86_64-unknown-linux-gnu
+          - x86_64-unknown-linux-musl
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install cross
+        run: |
+          cargo install --locked cross
+      - name: Test
+        run: |
+          cross test --target=${{ matrix.target }} --release --verbose
+
+  cross-build:
+    name: Build (${{ matrix.target }}, using cross-compilation)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - i686-linux-android
+          - i686-pc-windows-gnu
+          - i686-unknown-freebsd
+          - sparcv9-sun-solaris
+          - x86_64-linux-android
+          - x86_64-pc-windows-gnu
+          - x86_64-unknown-freebsd
+          - x86_64-unknown-freebsd
+          - x86_64-unknown-illumos
+          - x86_64-unknown-illumos
+          - x86_64-unknown-netbsd
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install cross
+        run: |
+          cargo install --locked cross
+      - name: Build
+        run: |
+          cross build --target=${{ matrix.target }} --release --verbose
+
   cargo-test-all-features:
     name: Build and Test (all features combinations)
     runs-on: ubuntu-latest
