@@ -2,6 +2,8 @@
 
 ## atomic-write-file 0.2.2
 
+### Unix changes
+
 * Fixed a build error with `androideabi` (contributed by
   [xuxiaocheng0201](https://github.com/andreacorbellini/rust-atomic-write-file/pull/10)).
 
