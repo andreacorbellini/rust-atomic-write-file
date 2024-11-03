@@ -246,6 +246,8 @@ fn copy_file_perms<P: AsRef<Path>>(
         Err(err) => return Err(err.into()),
     };
     if opts.preserve_mode {
+        // On `androideabi`, `mode_t` is not `u32` but `u16`, hence the cast. This will truncate
+        // the higher bits, but that is fine as those bits can't have any effect.
         #[allow(clippy::unnecessary_cast)]
         let mode = Mode::from_bits_retain(stat.st_mode as mode_t);
         fchmod(copy_to.as_raw_fd(), mode)?;
