@@ -1,3 +1,6 @@
+#![allow(clippy::print_stderr)]
+#![allow(clippy::print_stdout)]
+
 use crate::AtomicWriteFile;
 use std::fs;
 use std::io::ErrorKind;
