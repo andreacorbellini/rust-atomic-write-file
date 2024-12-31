@@ -622,7 +622,6 @@ impl AtomicWriteFile {
     /// case any error produced by `discard()` is ignored.
     /// See also [`AtomicWriteFile::commit()`].
     ///
-    ///
     /// # Examples
     ///
     /// ```
