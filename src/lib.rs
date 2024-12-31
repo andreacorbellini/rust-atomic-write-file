@@ -581,9 +581,6 @@ impl AtomicWriteFile {
     /// for details about the internal implementation of `commit()`, as well as platform-specific
     /// details.
     ///
-    /// This method is automatically called when `AtomicWriteFile` is dropped, although in that
-    /// case any error produced by `commit()` is ignored.
-    ///
     /// See also [`AtomicWriteFile::discard()`].
     ///
     /// # Examples
@@ -621,7 +618,10 @@ impl AtomicWriteFile {
     /// After calling `discard()`, the `AtomicWriteFile` is consumed and can no longer be used.
     /// Clones of the underlaying [`File`] may still be used after calling `discard()`.
     ///
+    /// This method is automatically called when `AtomicWriteFile` is dropped, although in that
+    /// case any error produced by `discard()` is ignored.
     /// See also [`AtomicWriteFile::commit()`].
+    ///
     ///
     /// # Examples
     ///
