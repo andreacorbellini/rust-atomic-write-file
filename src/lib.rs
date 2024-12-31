@@ -620,6 +620,7 @@ impl AtomicWriteFile {
     ///
     /// This method is automatically called when `AtomicWriteFile` is dropped, although in that
     /// case any error produced by `discard()` is ignored.
+    ///
     /// See also [`AtomicWriteFile::commit()`].
     ///
     /// # Examples
