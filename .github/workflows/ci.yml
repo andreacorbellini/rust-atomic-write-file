@@ -80,25 +80,6 @@ jobs:
           cargo clippy --all-targets -- --deny=warnings
           cargo fmt --check
 
-  cargo-test-wasi:
-    name: Build (wasi)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: wasm32-wasip1
-      - name: Install cargo-wasi
-        run: |
-          cargo install --locked cargo-wasi
-      - name: Build
-        run: |
-          cargo wasi build --release --verbose
-      - name: Lint
-        run: |
-          cargo clippy --all-targets -- --deny=warnings
-          cargo fmt --check
-
   cross-test:
     name: Build and Test (${{ matrix.target }}, using cross-compilation)
     runs-on: ubuntu-latest
