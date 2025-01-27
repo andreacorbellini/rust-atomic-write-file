@@ -141,7 +141,7 @@ mksquashfs "$initramfs_build_dir" "$initramfs"
 
 echo "${status}Creating${reset} test $filesystem_type filesystem at $testfs"
 
-dd if=/dev/zero of="$testfs" bs=1M count=200
+dd if=/dev/zero of="$testfs" bs=1M count=300
 "mkfs.$filesystem_type" "$testfs"
 
 #
