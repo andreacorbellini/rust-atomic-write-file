@@ -52,7 +52,7 @@ impl<'a> Directory<'a> {
 }
 
 #[cfg(any(unix, target_os = "wasi"))]
-impl<'a> std::os::fd::AsFd for Directory<'a> {
+impl std::os::fd::AsFd for Directory<'_> {
     #[inline]
     fn as_fd(&self) -> std::os::fd::BorrowedFd<'_> {
         self.inner.as_fd()
@@ -60,7 +60,7 @@ impl<'a> std::os::fd::AsFd for Directory<'a> {
 }
 
 #[cfg(any(unix, target_os = "wasi"))]
-impl<'a> std::os::fd::AsRawFd for Directory<'a> {
+impl std::os::fd::AsRawFd for Directory<'_> {
     #[inline]
     fn as_raw_fd(&self) -> std::os::fd::RawFd {
         self.inner.as_raw_fd()

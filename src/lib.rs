@@ -825,7 +825,7 @@ impl Write for &AtomicWriteFile {
     #[inline]
     #[cfg(feature = "unstable-can_vector")]
     fn is_write_vectored(&self) -> bool {
-        (&self.temporary_file.file).is_write_vectored()
+        self.temporary_file.file.is_write_vectored()
     }
 
     #[inline]
