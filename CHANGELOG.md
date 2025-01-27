@@ -1,5 +1,11 @@
 # Changelog
 
+## atomic-write-file 0.2.3
+
+* Fixed documentation to state that `discard()` (not `commit()`) is called on
+  drop (contributed by
+  [Lucy](https://github.com/andreacorbellini/rust-atomic-write-file/pull/11)).
+
 ## atomic-write-file 0.2.2
 
 ### Unix changes
