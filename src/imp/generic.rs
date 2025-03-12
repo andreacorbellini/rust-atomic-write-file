@@ -1,4 +1,4 @@
-use rand::distributions::Alphanumeric;
+use rand::distr::Alphanumeric;
 use rand::Rng;
 use std::ffi::OsStr;
 use std::ffi::OsString;
@@ -116,7 +116,7 @@ impl<'a> RandomName<'a> {
     }
 
     fn next(&mut self) -> OsString {
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let mut name = OsString::with_capacity(1 + self.base_name.len() + 1 + Self::SUFFIX_SIZE);
         let mut suffix = Vec::with_capacity(Self::SUFFIX_SIZE);
         name.push(".");
