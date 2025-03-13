@@ -12,7 +12,7 @@ keywords = ["file", "atomic", "write"]
 categories = ["filesystem"]
 
 [dependencies]
-rand = { version = "0.8" }
+rand = { version = "0.9" }
 
 [target.'cfg(unix)'.dependencies]
 nix = { version = "0.29", features = ["fs", "user"] }

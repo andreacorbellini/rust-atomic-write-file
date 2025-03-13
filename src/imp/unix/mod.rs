@@ -15,7 +15,7 @@ use nix::unistd::unlinkat;
 use nix::unistd::Gid;
 use nix::unistd::Uid;
 use nix::unistd::UnlinkatFlags;
-use rand::distributions::Alphanumeric;
+use rand::distr::Alphanumeric;
 use rand::Rng;
 use std::ffi::OsStr;
 use std::ffi::OsString;
@@ -144,7 +144,7 @@ impl RandomName {
     }
 
     fn next(&mut self) -> &OsStr {
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let buf_len = self.buf.len();
         let suffix = &mut self.buf[buf_len - RandomName::SUFFIX_SIZE..];
         for c in suffix.iter_mut() {
