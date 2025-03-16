@@ -119,7 +119,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - name: Install cross
         run: |
-          cargo install --locked cross
+          cargo install cross --locked --git https://github.com/cross-rs/cross
       - name: Test
         run: |
           cross test --target=${{ matrix.target }} --release --verbose
