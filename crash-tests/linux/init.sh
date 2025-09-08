@@ -17,6 +17,8 @@ if grep -q test.verify /proc/cmdline; then
   poweroff -f
 fi
 
+ln -sf /dev/urandom /dev/random
+
 echo 'Running test binary'
 atomic-write-file-test
 
