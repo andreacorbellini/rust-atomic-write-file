@@ -1,5 +1,18 @@
 # Changelog
 
+## atomic-write-file 0.3.0
+
+### Unix changes
+
+* Updated dependency on `nix` to version 0.30.
+
+### Breaking changes
+
+* Changed Rust edition from 2021 to 2024.
+
+* Explicitly set the MSRV to 0.85 (the first Rust version to support the 2024
+  edition).
+
 ## atomic-write-file 0.2.3
 
 * Fixed documentation to state that `discard()` (not `commit()`) is called on

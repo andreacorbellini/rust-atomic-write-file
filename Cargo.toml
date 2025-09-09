@@ -1,6 +1,6 @@
 [package]
 name = "atomic-write-file"
-version = "0.2.3"
+version = "0.3.0"
 authors = ["Andrea Corbellini <corbellini.andrea@gmail.com>"]
 edition = "2024"
 rust-version = "1.85"
