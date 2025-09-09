@@ -122,6 +122,7 @@ jobs:
           cargo install cross --locked --git https://github.com/cross-rs/cross
       - name: Test
         run: |
+          export TEST_DIR=$RUNNER_TEMP
           cross test --target=${{ matrix.target }} --release --verbose
 
   cross-build:

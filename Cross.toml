@@ -1,0 +1,5 @@
+[build.env]
+passthrough = [
+    "TEST_DIR",
+    "TEST_DIR_SUPPORTS_UNNAMED",
+]
