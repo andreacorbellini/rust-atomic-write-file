@@ -1,8 +1,8 @@
 //! Unix-specific extensions to [`AtomicWriteFile`] and [`OpenOptions`].
 
-use crate::imp::Preserve;
 use crate::AtomicWriteFile;
 use crate::OpenOptions;
+use crate::imp::Preserve;
 use nix::sys::stat::mode_t;
 use std::io::Result;
 use std::os::unix::fs;

@@ -1,14 +1,14 @@
+use crate::imp::unix::Dir;
+use crate::imp::unix::OpenOptions;
+use crate::imp::unix::RandomName;
 use crate::imp::unix::copy_file_perms;
 use crate::imp::unix::create_temporary_file;
 use crate::imp::unix::remove_temporary_file;
 use crate::imp::unix::rename_temporary_file;
-use crate::imp::unix::Dir;
-use crate::imp::unix::OpenOptions;
-use crate::imp::unix::RandomName;
 use nix::errno::Errno;
-use nix::fcntl::openat;
 use nix::fcntl::AtFlags;
 use nix::fcntl::OFlag;
+use nix::fcntl::openat;
 use nix::libc;
 use nix::sys::stat::Mode;
 use nix::unistd::fdatasync;
@@ -35,6 +35,7 @@ fn create_unnamed_temporary_file(dir: &Dir, opts: &OpenOptions) -> nix::Result<F
 
     let file_fd = openat(Some(dir.as_raw_fd()), ".", flags, create_mode)?;
 
+    // SAFETY: `file_fd` is an exclusively owned file descriptor, and it's open
     let file = unsafe { File::from_raw_fd(file_fd) };
     Ok(file)
 }

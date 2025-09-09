@@ -1,5 +1,5 @@
-use rand::distr::Alphanumeric;
 use rand::Rng;
+use rand::distr::Alphanumeric;
 use std::ffi::OsStr;
 use std::ffi::OsString;
 use std::fs;

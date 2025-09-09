@@ -1,9 +1,9 @@
+use crate::imp::unix::Dir;
+use crate::imp::unix::OpenOptions;
 use crate::imp::unix::copy_file_perms;
 use crate::imp::unix::create_temporary_file;
 use crate::imp::unix::remove_temporary_file;
 use crate::imp::unix::rename_temporary_file;
-use crate::imp::unix::Dir;
-use crate::imp::unix::OpenOptions;
 use nix::errno::Errno;
 use std::ffi::OsString;
 use std::fs::File;

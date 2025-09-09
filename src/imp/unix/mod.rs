@@ -1,22 +1,22 @@
 use nix::errno::Errno;
+use nix::fcntl::AtFlags;
+use nix::fcntl::OFlag;
 use nix::fcntl::open;
 use nix::fcntl::openat;
 use nix::fcntl::renameat;
-use nix::fcntl::AtFlags;
-use nix::fcntl::OFlag;
 use nix::libc;
+use nix::sys::stat::Mode;
 use nix::sys::stat::fchmod;
 use nix::sys::stat::fstatat;
 use nix::sys::stat::mode_t;
-use nix::sys::stat::Mode;
-use nix::unistd::fchown;
-use nix::unistd::fsync;
-use nix::unistd::unlinkat;
 use nix::unistd::Gid;
 use nix::unistd::Uid;
 use nix::unistd::UnlinkatFlags;
-use rand::distr::Alphanumeric;
+use nix::unistd::fchown;
+use nix::unistd::fsync;
+use nix::unistd::unlinkat;
 use rand::Rng;
+use rand::distr::Alphanumeric;
 use std::ffi::OsStr;
 use std::ffi::OsString;
 use std::fs::File;
@@ -99,6 +99,7 @@ impl Dir {
             OFlag::O_DIRECTORY | OFlag::O_CLOEXEC,
             Mode::empty(),
         )?;
+        // SAFETY: `fd` is an exclusively owned file descriptor, and it's open
         Ok(unsafe { Self::from_raw_fd(fd) })
     }
 }
@@ -120,7 +121,8 @@ impl AsRawFd for Dir {
 impl FromRawFd for Dir {
     unsafe fn from_raw_fd(fd: RawFd) -> Self {
         Self {
-            fd: OwnedFd::from_raw_fd(fd),
+            // SAFETY: upheld by the caller
+            fd: unsafe { OwnedFd::from_raw_fd(fd) },
         }
     }
 }
@@ -190,6 +192,7 @@ fn create_temporary_file(
         }
     };
 
+    // SAFETY: `file_fd` is an exclusively owned file descriptor, and it's open
     let file = unsafe { File::from_raw_fd(file_fd) };
     let temporary_name = random_name.into_os_string();
     Ok((file, temporary_name))

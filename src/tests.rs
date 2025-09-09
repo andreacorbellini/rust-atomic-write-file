@@ -63,13 +63,12 @@ fn verify_temporary_file_name<P1: AsRef<Path>, P2: AsRef<Path>>(
 ) {
     let dst_file_name = dst_file_name.as_ref().to_string_lossy().to_string();
     let temp_file_name = temp_file_name.as_ref().to_string_lossy().to_string();
-    let prefix = format!(".{}.", dst_file_name);
+    let prefix = format!(".{dst_file_name}.");
     assert!(
         temp_file_name.is_ascii()
             && temp_file_name.starts_with(&prefix)
             && temp_file_name.len() == prefix.len() + 6,
-        "invalid temporary file name: {:?}",
-        temp_file_name
+        "invalid temporary file name: {temp_file_name:?}"
     );
 }
 
