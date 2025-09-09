@@ -18,7 +18,6 @@ use std::ffi::OsString;
 use std::fs::File;
 use std::io::Result;
 use std::os::fd::AsRawFd;
-use std::os::fd::FromRawFd;
 use std::path::Path;
 
 fn create_unnamed_temporary_file(dir: &Dir, opts: &OpenOptions) -> nix::Result<File> {
@@ -33,11 +32,7 @@ fn create_unnamed_temporary_file(dir: &Dir, opts: &OpenOptions) -> nix::Result<F
         | OFlag::from_bits_truncate(opts.custom_flags & !libc::O_ACCMODE);
     let create_mode = Mode::from_bits_truncate(opts.mode);
 
-    let file_fd = openat(Some(dir.as_raw_fd()), ".", flags, create_mode)?;
-
-    // SAFETY: `file_fd` is an exclusively owned file descriptor, and it's open
-    let file = unsafe { File::from_raw_fd(file_fd) };
-    Ok(file)
+    openat(dir, ".", flags, create_mode).map(File::from)
 }
 
 fn rename_unnamed_temporary_file(dir: &Dir, file: &File, name: &OsStr) -> nix::Result<()> {
@@ -47,9 +42,9 @@ fn rename_unnamed_temporary_file(dir: &Dir, file: &File, name: &OsStr) -> nix::R
 
     let temporary_name = loop {
         match linkat(
-            Some(dir.as_raw_fd()),
+            dir,
             src.as_os_str(),
-            Some(dir.as_raw_fd()),
+            dir,
             random_name.next(),
             AtFlags::AT_SYMLINK_FOLLOW,
         ) {
@@ -64,7 +59,7 @@ fn rename_unnamed_temporary_file(dir: &Dir, file: &File, name: &OsStr) -> nix::R
     // again for safety.
     //
     // See https://github.com/andreacorbellini/rust-atomic-write-file/issues/6 for more details.
-    fdatasync(file.as_raw_fd())?;
+    fdatasync(file)?;
 
     rename_temporary_file(dir, &temporary_name, name)
 }

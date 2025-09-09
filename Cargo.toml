@@ -13,10 +13,10 @@ keywords = ["file", "atomic", "write"]
 categories = ["filesystem"]
 
 [dependencies]
-rand = { version = "0.9" }
+rand = { version = "0.9.2" }
 
 [target.'cfg(unix)'.dependencies]
-nix = { version = "0.29", features = ["fs", "user"] }
+nix = { version = "0.30.1", features = ["fs", "user"] }
 
 [features]
 default = []

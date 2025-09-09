@@ -24,7 +24,6 @@ use std::io::Result;
 use std::os::fd::AsFd;
 use std::os::fd::AsRawFd;
 use std::os::fd::BorrowedFd;
-use std::os::fd::FromRawFd;
 use std::os::fd::OwnedFd;
 use std::os::fd::RawFd;
 use std::os::unix::ffi::OsStrExt;
@@ -99,8 +98,7 @@ impl Dir {
             OFlag::O_DIRECTORY | OFlag::O_CLOEXEC,
             Mode::empty(),
         )?;
-        // SAFETY: `fd` is an exclusively owned file descriptor, and it's open
-        Ok(unsafe { Self::from_raw_fd(fd) })
+        Ok(Self { fd })
     }
 }
 
@@ -115,15 +113,6 @@ impl AsRawFd for Dir {
     #[inline]
     fn as_raw_fd(&self) -> RawFd {
         self.fd.as_raw_fd()
-    }
-}
-
-impl FromRawFd for Dir {
-    unsafe fn from_raw_fd(fd: RawFd) -> Self {
-        Self {
-            // SAFETY: upheld by the caller
-            fd: unsafe { OwnedFd::from_raw_fd(fd) },
-        }
     }
 }
 
@@ -179,42 +168,26 @@ fn create_temporary_file(
     let create_mode = Mode::from_bits_truncate(opts.mode);
 
     let mut random_name = RandomName::new(name);
-    let file_fd = loop {
-        match openat(
-            Some(dir.as_raw_fd()),
-            random_name.next(),
-            flags,
-            create_mode,
-        ) {
-            Ok(file_fd) => break file_fd,
+    let file = loop {
+        match openat(dir, random_name.next(), flags, create_mode) {
+            Ok(file_fd) => break File::from(file_fd),
             Err(Errno::EEXIST) => continue,
             Err(err) => return Err(err),
         }
     };
 
-    // SAFETY: `file_fd` is an exclusively owned file descriptor, and it's open
-    let file = unsafe { File::from_raw_fd(file_fd) };
     let temporary_name = random_name.into_os_string();
     Ok((file, temporary_name))
 }
 
 fn rename_temporary_file(dir: &Dir, temporary_name: &OsStr, name: &OsStr) -> nix::Result<()> {
-    renameat(
-        Some(dir.as_raw_fd()),
-        temporary_name,
-        Some(dir.as_raw_fd()),
-        name,
-    )?;
-    fsync(dir.as_raw_fd())
+    renameat(dir, temporary_name, dir, name)?;
+    fsync(dir)
 }
 
 fn remove_temporary_file(dir: &Dir, temporary_name: &OsStr) -> nix::Result<()> {
-    unlinkat(
-        Some(dir.as_raw_fd()),
-        temporary_name,
-        UnlinkatFlags::NoRemoveDir,
-    )?;
-    fsync(dir.as_raw_fd())
+    unlinkat(dir, temporary_name, UnlinkatFlags::NoRemoveDir)?;
+    fsync(dir)
 }
 
 fn maybe_ignore_eperm(result: nix::Result<()>, preserve: Preserve) -> nix::Result<()> {
@@ -239,11 +212,7 @@ fn copy_file_perms<P: AsRef<Path>>(
     copy_to: &File,
     opts: &OpenOptions,
 ) -> Result<()> {
-    let stat = match fstatat(
-        Some(dir.as_raw_fd()),
-        copy_from.as_ref(),
-        AtFlags::AT_SYMLINK_NOFOLLOW,
-    ) {
+    let stat = match fstatat(dir, copy_from.as_ref(), AtFlags::AT_SYMLINK_NOFOLLOW) {
         Ok(stat) => stat,
         Err(Errno::ENOENT) => return Ok(()),
         Err(err) => return Err(err.into()),
@@ -253,15 +222,12 @@ fn copy_file_perms<P: AsRef<Path>>(
         // the higher bits, but that is fine as those bits can't have any effect.
         #[allow(clippy::unnecessary_cast)]
         let mode = Mode::from_bits_retain(stat.st_mode as mode_t);
-        fchmod(copy_to.as_raw_fd(), mode)?;
+        fchmod(copy_to, mode)?;
     }
     if opts.preserve_owner.is_yes() {
         let uid = Uid::from_raw(stat.st_uid);
         let gid = Gid::from_raw(stat.st_gid);
-        maybe_ignore_eperm(
-            fchown(copy_to.as_raw_fd(), Some(uid), Some(gid)),
-            opts.preserve_owner,
-        )?;
+        maybe_ignore_eperm(fchown(copy_to, Some(uid), Some(gid)), opts.preserve_owner)?;
     }
     Ok(())
 }
