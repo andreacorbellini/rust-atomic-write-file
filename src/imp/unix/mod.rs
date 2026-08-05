@@ -15,7 +15,7 @@ use nix::unistd::UnlinkatFlags;
 use nix::unistd::fchown;
 use nix::unistd::fsync;
 use nix::unistd::unlinkat;
-use rand::Rng;
+use rand::RngExt;
 use rand::distr::Alphanumeric;
 use std::ffi::OsStr;
 use std::ffi::OsString;
