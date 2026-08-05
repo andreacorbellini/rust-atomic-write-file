@@ -1,4 +1,4 @@
-use rand::Rng;
+use rand::RngExt;
 use rand::distr::Alphanumeric;
 use std::ffi::OsStr;
 use std::ffi::OsString;
