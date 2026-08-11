@@ -163,10 +163,10 @@ jobs:
       - name: Build and Test
         run: |
           export TEST_DIR=$RUNNER_TEMP
-          cargo +nightly test-all-features --release --verbose
+          cargo +nightly all-features test --release --verbose
       - name: Lint
         run: |
-          cargo +nightly check-all-features --all-targets
+          cargo +nightly all-features clippy --all-targets -- --deny=warnings
 
   lint-crash-tests:
     name: Lint Crash Tests
