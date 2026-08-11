@@ -25,6 +25,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
+          components: clippy, rustfmt
       - name: Build and Test
         run: |
           export TEST_DIR=$RUNNER_TEMP
@@ -57,6 +58,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
       - name: Build and Test
         run: |
           export TEST_DIR=$RUNNER_TEMP
@@ -72,6 +75,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
       - name: Build and Test
         run: |
           set TEST_DIR=%RUNNER_TEMP%
@@ -157,6 +162,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: clippy
       - name: Install cargo-all-features
         run: |
           cargo install --locked cargo-all-features
@@ -174,6 +181,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
       - name: Lint
         run: |
           cd crash-tests/linux
