@@ -2,6 +2,16 @@
 
 ## atomic-write-file 0.3.0
 
+* Updated dependency on `rand` to version 0.10 (contributed by
+  [thehouseisonfire](https://github.com/andreacorbellini/rust-atomic-write-file/pull/15)).
+
+### Unix changes
+
+* Updated dependency on `nix` to version 0.31 (contributed by
+  [thehouseisonfire](https://github.com/andreacorbellini/rust-atomic-write-file/pull/16)).
+
+## atomic-write-file 0.3.0
+
 ### Unix changes
 
 * Updated dependency on `nix` to version 0.30.
