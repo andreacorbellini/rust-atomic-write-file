@@ -715,13 +715,13 @@ impl Read for AtomicWriteFile {
 
     #[inline]
     #[cfg(feature = "unstable-read_buf")]
-    fn read_buf(&mut self, buf: BorrowedCursor<'_>) -> Result<()> {
+    fn read_buf(&mut self, buf: BorrowedCursor<'_, u8>) -> Result<()> {
         self.temporary_file.file.read_buf(buf)
     }
 
     #[inline]
     #[cfg(feature = "unstable-read_buf")]
-    fn read_buf_exact(&mut self, cursor: BorrowedCursor<'_>) -> Result<()> {
+    fn read_buf_exact(&mut self, cursor: BorrowedCursor<'_, u8>) -> Result<()> {
         self.temporary_file.file.read_buf_exact(cursor)
     }
 }
@@ -760,13 +760,13 @@ impl Read for &AtomicWriteFile {
 
     #[inline]
     #[cfg(feature = "unstable-read_buf")]
-    fn read_buf(&mut self, buf: BorrowedCursor<'_>) -> Result<()> {
+    fn read_buf(&mut self, buf: BorrowedCursor<'_, u8>) -> Result<()> {
         (&self.temporary_file.file).read_buf(buf)
     }
 
     #[inline]
     #[cfg(feature = "unstable-read_buf")]
-    fn read_buf_exact(&mut self, cursor: BorrowedCursor<'_>) -> Result<()> {
+    fn read_buf_exact(&mut self, cursor: BorrowedCursor<'_, u8>) -> Result<()> {
         (&self.temporary_file.file).read_buf_exact(cursor)
     }
 }
